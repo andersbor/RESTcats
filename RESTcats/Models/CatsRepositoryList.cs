@@ -1,4 +1,6 @@
-﻿namespace RESTcats.Models
+﻿using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
+namespace RESTcats.Models
 {
     public class CatsRepositoryList : ICatsRepository
     {
@@ -21,7 +23,38 @@
             )
         {
             // TODO use filter + order
-            return cats.AsReadOnly();
+            IEnumerable<Cat> result = cats.AsQueryable();
+            if (filterNameContains != null)
+            {
+                result = result.Where(cat => cat.Name != null && cat.Name.Contains(filterNameContains));
+            }
+            if (filterWeightAtLeast != null)
+            {
+                result = result.Where(cat => cat.Weight >= filterWeightAtLeast);
+            }
+            switch (orderBy)
+            {
+                case null:
+                    break; // do nothing
+                case "name":
+                case "name_asc":
+                    result = result.OrderBy(cat => cat.Name);
+                    break;
+                case "name_desc":
+                    result = result.OrderByDescending(cat => cat.Name);
+                    break;
+                case "weight":
+                case "weight_asc":
+                    result = result.OrderBy(cat => cat.Weight);
+                    break;
+                case "weight_desc":
+                    result = result.OrderByDescending(cat => cat.Weight);
+                    break;
+                default:
+                    break; // do nothing
+                    //throw new ArgumentException("Unknown sort order: " + orderBy);
+            }
+            return result;
         }
         public Cat? GetCatById(int id)
         {

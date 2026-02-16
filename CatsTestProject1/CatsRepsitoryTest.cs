@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RESTcats.Models;
-using System.Collections.ObjectModel;
 
 namespace CatsTestProject1
 {
     public class CatsRepsitoryTest
     {
-        private bool useDatabase = true;
+        private bool useDatabase = false;
         private ICatsRepository repo;
 
         // some data for the test cases
