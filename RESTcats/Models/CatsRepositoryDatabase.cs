@@ -1,6 +1,6 @@
 ﻿namespace RESTcats.Models
 {
-    public class CatsRepositoryDatabase: ICatsRepository
+    public class CatsRepositoryDatabase : ICatsRepository
     {
         private readonly CatsDbContext _context;
         public CatsRepositoryDatabase(CatsDbContext context)
@@ -19,9 +19,44 @@
             return cat;
         }
 
-        public IEnumerable<Cat> GetAllCats()
+        public IEnumerable<Cat> GetCats(
+            string? filterNameContains = null,
+            int? filterWeightAtLeast = null,
+            string? orderBy = null
+            )
         {
-            return _context.Cats;
+            IQueryable<Cat> query = _context.Cats;
+            if (filterNameContains != null)
+            {
+                query = query.Where(cat => cat.Name != null && cat.Name.Contains(filterNameContains));
+            }
+            if (filterWeightAtLeast != null)
+            {
+                query = query.Where(cat => cat.Weight >= filterWeightAtLeast);
+            }
+            switch (orderBy)
+            {
+                case null:
+                    break; // do nothing
+                case "name":
+                case "name_asc":
+                    query = query.OrderBy(cat => cat.Name);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(cat => cat.Name);
+                    break;
+                case "weight":
+                case "weight_asc":
+                    query = query.OrderBy(cat => cat.Weight);
+                    break;
+                case "weight_desc":
+                    query = query.OrderByDescending(cat => cat.Weight);
+                    break;
+                default:
+                    break; // do nothing
+                    //throw new ArgumentException("Unknown sort order: " + orderBy);
+            }
+            return query;
         }
 
         public Cat? GetCatById(int id)

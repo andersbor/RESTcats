@@ -6,12 +6,18 @@ namespace CatsTestProject1
 {
     public class CatsRepsitoryTest
     {
-        private bool useDatabase = false;
+        private bool useDatabase = true;
         private ICatsRepository repo;
+
+        // some data for the test cases
+        private Cat garfield = new() { Name = "Garfield", Weight = 100 };
+        private Cat nedjem = new() { Name = "Nedjem", Weight = 20 };
+        private Cat polleke = new() { Name = "Polleke", Weight = 12 };
 
         public CatsRepsitoryTest()
         {
-            if (useDatabase) {
+            if (useDatabase)
+            {
                 var optionsBuilder = new DbContextOptionsBuilder<CatsDbContext>();
                 // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets
                 optionsBuilder.UseSqlServer(Secrets.ConnectionStringSimply);
@@ -41,7 +47,7 @@ namespace CatsTestProject1
             Assert.Equal("TestCat", added.Name);
             Assert.Equal(3, added.Weight);
 
-            IEnumerable<Cat> all = repo.GetAllCats();
+            IEnumerable<Cat> all = repo.GetCats();
             int countAfterAdd = all.Count();
             Assert.Equal(1, countAfterAdd);
 
@@ -65,20 +71,6 @@ namespace CatsTestProject1
         }
 
         [Fact]
-        public void GetAllCats_ReturnsReadOnlyCollection()
-        {
-            //ICatsRepository repo = new CatsRepositoryList(includeData: true);
-
-            IEnumerable<Cat> all = repo.GetAllCats();
-
-            ReadOnlyCollection<Cat> readOnly = Assert.IsType<ReadOnlyCollection<Cat>>(all);
-            IList<Cat> asList = (IList<Cat>)readOnly;
-
-            // Attempting to modify the returned collection should throw NotSupportedException
-            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => asList.Add(new Cat { Name = "X", Weight = 1 }));
-        }
-
-        [Fact]
         public void GetCatById_ReturnsCorrectCatOrNull()
         {
             //ICatsRepository repo = new CatsRepositoryList(includeData: false);
@@ -91,6 +83,25 @@ namespace CatsTestProject1
 
             Cat? notFound = repo.GetCatById(999);
             Assert.Null(notFound);
+        }
+
+        [Fact]
+  
+        public void GetCats_OrderByNameAscendingAndDescending()
+        {
+            repo.AddCat(garfield);
+            repo.AddCat(nedjem);
+            repo.AddCat(polleke);
+
+            IEnumerable<Cat> asc = repo.GetCats(orderBy: "name");
+            IEnumerable<string> ascNames = asc.Select(c => c.Name!);
+            List<string> expectedAsc = new List<string> { "Garfield", "Nedjem", "Polleke" };
+            Assert.Equal(expectedAsc, ascNames);
+
+            List<Cat> desc = repo.GetCats(orderBy: "name_desc").ToList();
+            List<string> descNames = desc.Select(c => c.Name!).ToList();
+            List<string> expectedDesc = new List<string> { "Polleke", "Nedjem", "Garfield" };
+            Assert.Equal(expectedDesc, descNames);
         }
 
         [Fact]
@@ -107,7 +118,7 @@ namespace CatsTestProject1
             Cat? postLookup = repo.GetCatById(added.Id);
             Assert.Null(postLookup);
 
-            int remaining = repo.GetAllCats().Count();
+            int remaining = repo.GetCats().Count();
             Assert.Equal(0, remaining);
         }
 

@@ -15,8 +15,12 @@
             }
         }
 
-        public IEnumerable<Cat> GetAllCats()
+        public IEnumerable<Cat> GetCats(string? filterNameContains = null,
+            int? filterWeightAtLeast = null,
+            string? orderBy = null
+            )
         {
+            // TODO use filter + order
             return cats.AsReadOnly();
         }
         public Cat? GetCatById(int id)
