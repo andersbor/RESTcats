@@ -93,15 +93,50 @@ namespace CatsTestProject1
             repo.AddCat(nedjem);
             repo.AddCat(polleke);
 
-            IEnumerable<Cat> asc = repo.GetCats(orderBy: "name");
-            IEnumerable<string> ascNames = asc.Select(c => c.Name!);
+            IEnumerable<Cat> catsByNameAsc = repo.GetCats(orderBy: "name");
+            IEnumerable<string> ascNames = catsByNameAsc.Select(c => c.Name!);
             List<string> expectedAsc = new List<string> { "Garfield", "Nedjem", "Polleke" };
             Assert.Equal(expectedAsc, ascNames);
 
-            List<Cat> desc = repo.GetCats(orderBy: "name_desc").ToList();
-            List<string> descNames = desc.Select(c => c.Name!).ToList();
+            IEnumerable<Cat> catsByNameDesc = repo.GetCats(orderBy: "name_desc");
+            IEnumerable<string> descNames = catsByNameDesc.Select(c => c.Name!);
             List<string> expectedDesc = new List<string> { "Polleke", "Nedjem", "Garfield" };
             Assert.Equal(expectedDesc, descNames);
+
+            IEnumerable<Cat> catsByWeightAsc = repo.GetCats(orderBy: "weight");
+            IEnumerable<int> ascWeights = catsByWeightAsc.Select(c => c.Weight);
+            List<int> expectedWeightAsc = new List<int> { 12, 20, 100 };
+            Assert.Equal(expectedWeightAsc, ascWeights);
+
+            IEnumerable<Cat> catsByWeightDesc = repo.GetCats(orderBy: "weight_desc");
+            IEnumerable<int> descWeights = catsByWeightDesc.Select(c => c.Weight);
+            List<int> expectedWeightsDesc = new List<int> { 100, 20, 12 };
+            Assert.Equal(expectedWeightsDesc, descWeights);
+        }
+
+        [Fact]
+        public void GetCats_FilterNameContains_ReturnsOnlyMatching()
+        {
+            repo.AddCat(garfield);
+            repo.AddCat(nedjem);
+            repo.AddCat(polleke);
+
+            IEnumerable<Cat> query = repo.GetCats(filterNameContains: "field");
+
+            Assert.Single(query);
+            List<Cat> list = query.ToList();
+            Cat first = list[0];
+            Assert.Equal("Garfield", first.Name);
+            Assert.Equal(100, first.Weight);
+
+            IEnumerable<Cat> namesContaingE = repo.GetCats(filterNameContains: "e");
+            Assert.Equal(3, namesContaingE.Count());
+
+            IEnumerable<Cat> highWeight = repo.GetCats(filterWeightAtLeast: 80);
+            Assert.Single(highWeight);
+
+            IEnumerable<Cat> mediumWeight = repo.GetCats(filterWeightAtLeast: 15);
+            Assert.Equal(2, mediumWeight.Count());
         }
 
         [Fact]
