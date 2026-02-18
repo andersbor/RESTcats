@@ -4,27 +4,35 @@ using System.Collections.ObjectModel;
 
 namespace CatsTestProject1
 {
+    enum Version { Ordinary, Database, ThreadSafe }
+
     public class CatsRepsitoryTest
     {
-        private bool useDatabase = false;
+        private readonly Version version = Version.Ordinary;
         private ICatsRepository repo;
 
         public CatsRepsitoryTest()
         {
-            if (useDatabase) {
-                var optionsBuilder = new DbContextOptionsBuilder<CatsDbContext>();
-                // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets
-                optionsBuilder.UseSqlServer(Secrets.ConnectionStringSimply);
-                // connection string structure
-                //   "Data Source=mssql7.unoeuro.com;Initial Catalog=FROM simply.com;Persist Security Info=True;User ID=FROM simply.com;Password=DB PASSWORD FROM simply.com;TrustServerCertificate=True"
-                CatsDbContext _dbContext = new(optionsBuilder.Options);
-                // clean database table: remove all rows
-                _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Cats");
-                repo = new CatsRepositoryDatabase(_dbContext);
-            }
-            else
+            switch (version)
             {
-                repo = new CatsRepositoryList(includeData: false);
+                case Version.Ordinary:
+                    repo = new CatsRepositoryList(includeData: false);
+                    break;
+                case Version.Database:
+
+                    var optionsBuilder = new DbContextOptionsBuilder<CatsDbContext>();
+                    // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets
+                    optionsBuilder.UseSqlServer(Secrets.ConnectionStringSimply);
+                    // connection string structure
+                    //   "Data Source=mssql7.unoeuro.com;Initial Catalog=FROM simply.com;Persist Security Info=True;User ID=FROM simply.com;Password=DB PASSWORD FROM simply.com;TrustServerCertificate=True"
+                    CatsDbContext _dbContext = new(optionsBuilder.Options);
+                    // clean database table: remove all rows
+                    _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Cats");
+                    repo = new CatsRepositoryDatabase(_dbContext);
+                    break;
+                case Version.ThreadSafe:
+                    repo = new CatsRepositoryListThreadSafe(includeData: false);
+                    break;
             }
         }
 
