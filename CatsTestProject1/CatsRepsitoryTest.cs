@@ -8,7 +8,7 @@ namespace CatsTestProject1
 
     public class CatsRepsitoryTest
     {
-        private readonly Version version = Version.Ordinary;
+        private readonly Version version = Version.ThreadSafe;
         private ICatsRepository repo;
 
         public CatsRepsitoryTest()

@@ -1,8 +1,14 @@
+using RESTcats.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+// register singleton instance of CatsRepositoryList
+builder.Services.AddSingleton<ICatsRepository>(new CatsRepositoryList(includeData: true));
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
