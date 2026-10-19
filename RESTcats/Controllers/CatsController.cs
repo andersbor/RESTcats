@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RESTcats.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -42,6 +43,7 @@ namespace RESTcats.Controllers
         // POST api/<CatsController>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Cat> Post([FromBody] Cat cat)
         {
             catsRepository.AddCat(cat);
@@ -52,6 +54,7 @@ namespace RESTcats.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Cat> Put(int id, [FromBody] Cat cat)
         {
             Cat? updatedCat = catsRepository.UpdateCat(id, cat);
@@ -65,12 +68,11 @@ namespace RESTcats.Controllers
             }
         }
 
-        
-
         // DELETE api/<CatsController>/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Cat> Delete(int id)
         {
             Cat? cat = catsRepository.GetCatById(id);
